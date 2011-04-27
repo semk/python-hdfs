@@ -82,18 +82,20 @@ class Hfile(object):
     ret = libhdfs.hdfsPread(self.fs, self.fh, position, buf_p, length)
     if ret == -1:
       raise HdfsError('read failure')
-    return buf.value
+    return buf.raw
 
-  def read(self):
+  def read(self, size=None):
     st = self.stat()
+    if not size:
+      size = st.mSize
 
-    buf = create_string_buffer(st.mSize)
+    buf = create_string_buffer(size)
     buf_p = cast(buf, c_void_p)
 
-    ret = libhdfs.hdfsRead(self.fs, self.fh, buf_p, st.mSize)
+    ret = libhdfs.hdfsRead(self.fs, self.fh, buf_p, size)
     if ret == -1:
       raise HdfsError('read failure')
-    return buf.value[0:ret]
+    return buf.raw[0:ret]
 
   def readline(self, length=100):
     line = ''
